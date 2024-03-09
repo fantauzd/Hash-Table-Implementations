@@ -131,7 +131,7 @@ class HashMap:
         # Correct the bug in the _next_prime method for 2 that we are not allowed to change
         if new_capacity == 2:
             new_map._capacity = 2
-            self._buckets.pop()
+            new_map._buckets.pop()
 
         # Copy each element from the old hash table to the new hash table
         list_pointer = 0
@@ -306,22 +306,21 @@ def find_mode(da: DynamicArray) -> tuple[DynamicArray, int]:
     mode = DynamicArray()
     freq = 0
 
-    # Iterate through the map and store the mode(s) and frequency
-    list_pointer = 0
-    counter = 0
-    while counter < map.get_size():
-        for node in map._buckets.get_at_index(list_pointer):
-            counter += 1
-            key = node.key
-            # If we find a key with higher frequency, replace the mode
-            if map.get(key) > freq:
-                mode = DynamicArray()
-                mode.append(key)
-                freq = map.get(key)
-            # If we find a key with the same frequency, add it to modes
-            elif map.get(key) == freq:
-                mode.append(key)
-        list_pointer += 1
+    # Return all the unique keys in an array of tuples like (key, frequency)
+    keys_array = map.get_keys_and_values()
+
+    # Iterate through the array of tuples and store the mode(s) and frequency
+    for i in range(map.get_size()):
+        pair = keys_array.get_at_index(i)
+        key, key_freq = pair[0], pair[1]
+        # If we find a key with higher frequency, replace the mode
+        if key_freq > freq:
+            mode = DynamicArray()
+            mode.append(key)
+            freq = key_freq
+        # If we find a key with the same frequency, add it to modes
+        elif key_freq == freq:
+            mode.append(key)
 
     # Return the mode(s) and frequency as a tuple
     return (mode, freq)
@@ -527,3 +526,12 @@ if __name__ == "__main__":
         da = DynamicArray(case)
         mode, frequency = find_mode(da)
         print(f"Input: {da}\nMode : {mode}, Frequency: {frequency}\n")
+
+
+    print("lets debug resize(2) ..... again")
+    print("--------------------------------")
+    p = HashMap(11, hash_function_1)
+    p.put('key822', 209)
+    p.put('key935', 217)
+    p.put('key721', 638)
+    p.resize_table(2)
