@@ -110,7 +110,7 @@ class HashMap:
         hash_bucket.insert(key, value)
         self._size += 1
 
-    def resize_table(self, new_capacity: int) -> None:
+    def easier_resize_table(self, new_capacity: int) -> None:
         """
         Changes the capacity of the underlying table. All existing key/value pairs must
         be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
@@ -131,6 +131,37 @@ class HashMap:
         # Update buckets and capacity
         self._buckets = new_map._buckets
         self._capacity = new_map._capacity
+
+    def resize_table(self, new_capacity: int) -> None:
+        """
+        Changes the capacity of the underlying table. All existing key/value pairs must
+        be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
+        where n is the number of elements in the original hash table.
+        """
+        # Ensure that the new capacity is a prime number greater than or equal to 1
+        if new_capacity < 1:
+            return
+        if new_capacity != 2:
+            new_capacity = self._next_prime(new_capacity)
+        # Initialize new buckets
+        new_buckets = DynamicArray()
+        for _ in range(new_capacity):
+            new_buckets.append(LinkedList())
+        # Copy each element from the old hash table to the new hash table
+        list_pointer = 0
+        counter = 0
+        # Copy all elements from each bucket until the new hash table is the same size as the old hash table
+        while counter < self._size:
+            for node in self._buckets.get_at_index(list_pointer):
+                # find the bucket that the key is hashed to with the new capacity and insert it
+                hash_bucket = new_buckets.get_at_index(self._hash_function(node.key) % new_capacity)
+                hash_bucket.insert(node.key, node.value)
+                counter += 1
+            list_pointer += 1
+        # Update buckets and capacity
+        self._buckets = new_buckets
+        self._capacity = new_capacity
+
 
     def table_load(self) -> float:
         """
