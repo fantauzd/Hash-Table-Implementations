@@ -267,8 +267,11 @@ class HashMap:
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
 
         # Remove node if it is in the bucket
-        hash_bucket.remove(key)
-        self._size -= 1
+        remove = hash_bucket.remove(key)
+
+        # If the removal was successful, decrement size
+        if remove is True:
+            self._size -= 1
 
     def get_keys_and_values(self) -> DynamicArray:
         """
@@ -292,7 +295,13 @@ class HashMap:
         Clears the contents of the hash map. It does not change the underlying hash
         table capacity. Runs in O(1).
         """
-        self._buckets = DynamicArray()
+
+        # set each bucket to an empty linked list
+        for i in range(self._capacity):
+            bucket = self._buckets.get_at_index(i)
+            bucket = LinkedList()
+
+        # set the size to 0
         self._size = 0
 
 
