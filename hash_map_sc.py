@@ -128,6 +128,11 @@ class HashMap:
         # Create a new hash table, this handles ensuring capacity is prime
         new_map = HashMap(new_capacity, self._hash_function)
 
+        # Correct the bug in the _next_prime method for 2 that we are not allowed to change
+        if new_capacity == 2:
+            new_map._capacity = 2
+            self._buckets.pop()
+
         # Copy each element from the old hash table to the new hash table
         list_pointer = 0
         # Copy all elements from each bucket until the new hash table is the same size as the old hash table
