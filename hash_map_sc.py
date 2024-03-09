@@ -1,9 +1,9 @@
-# Name:
-# OSU Email:
+# Name: Dominic Fantauzzo
+# OSU Email: fantauzd@oregonstate.edu
 # Course: CS261 - Data Structures
-# Assignment:
-# Due Date:
-# Description:
+# Assignment: Assignment 6: HashMap Implementation
+# Due Date: March 14, 2024,
+# Description: Implementation of a hash map using chaining to resolve collisions.
 
 
 from a6_include import (DynamicArray, LinkedList,
@@ -285,8 +285,8 @@ def find_mode(da: DynamicArray) -> tuple[DynamicArray, int]:
     This function will return a tuple containing, in this order, a dynamic array
     comprising the mode (most occurring) value(s) of the given array, and an
     integer representing the highest frequency of occurrence for the mode value(s).
-    Runs in O(1) as the hash table methods run in constant time.
-    O(n) occurs when we search through the hash table for the greatest frequency.
+    Runs in O(N) as the hash table methods run in constant time.
+    O(N) occurs when we build and search through the hash table for the greatest frequency.
 
     :param da: A dynamic array of strings
     :return: A tuple with a dynamic array containing the mode(s) and the mode(s)'s frequency.

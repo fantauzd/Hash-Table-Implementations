@@ -1,9 +1,9 @@
-# Name:
-# OSU Email:
+# Name: Dominic Fantauzzo
+# OSU Email: fantauzd@oregonstate.edu
 # Course: CS261 - Data Structures
-# Assignment:
-# Due Date:
-# Description:
+# Assignment: Assignment 6: HashMap Implementation
+# Due Date: March 14, 2024,
+# Description: Implementation of a hash map using open addressing and quadratic probing to resolve collisions.
 
 from a6_include import (DynamicArray, DynamicArrayException, HashEntry,
                         hash_function_1, hash_function_2)
@@ -141,15 +141,30 @@ class HashMap:
 
     def __iter__(self):
         """
-        TODO: Write this implementation
+        Enables the hash map to iterate across itself.
         """
-        pass
+
+        # Initialize a variable to track iterator's progress
+        self._index = 0
+
+        return self
 
     def __next__(self):
         """
-        TODO: Write this implementation
+        Returns the next item in the hash map, based on the current location of the iterator.
         """
-        pass
+
+        # Find the next value in the buckets dynamic array
+        try:
+            value = self._buckets.get_at_index(self._index)
+
+        # If we pass the end of the array an exception is raised and we stop iteration
+        except DynamicArrayException:
+            raise StopIteration
+
+        # Increment index and return value
+        self._index = self._index + 1
+        return value
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #
