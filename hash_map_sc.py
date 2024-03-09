@@ -110,7 +110,7 @@ class HashMap:
         hash_bucket.insert(key, value)
         self._size += 1
 
-    def easier_resize_table(self, new_capacity: int) -> None:
+    def resize_table(self, new_capacity: int) -> None:
         """
         Changes the capacity of the underlying table. All existing key/value pairs must
         be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
@@ -132,7 +132,36 @@ class HashMap:
         self._buckets = new_map._buckets
         self._capacity = new_map._capacity
 
-    def resize_table(self, new_capacity: int) -> None:
+    def other_resize_table(self, new_capacity: int) -> None:
+        """
+        Changes the capacity of the underlying table. All existing key/value pairs must
+        be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
+        where n is the number of elements in the original hash table.
+        """
+
+        # validate new capacity is at least 1, if it is less than 1, then do nothing
+        if new_capacity < 1:
+            return
+        # create a temporary hash map with new_capacity and same hash function as this object
+        temp = HashMap(new_capacity, self._hash_function)
+
+        # loop over the buckets of current hash map
+        for i in range(self._capacity):
+            bucket = self._buckets.get_at_index(i)  # get the ith list of the hash map
+
+            # loop over the nodes of ith list
+            for node in bucket:
+                temp.put(node.key, node.value)  # insert node's key/value pair into temp hash map.
+
+        # update capacity of self to new_capacity
+        self._capacity = new_capacity
+        self._buckets = DynamicArray()  # create an empty DynamicArray for this buckets
+
+        # loop over the buckets of temp object
+        for i in range(temp._capacity):
+            self._buckets.append(temp._buckets.get_at_index(i))  # insert the ith bucket list into the buckets array
+
+    def harder_resize_table(self, new_capacity: int) -> None:
         """
         Changes the capacity of the underlying table. All existing key/value pairs must
         be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
