@@ -90,55 +90,122 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
+        Updates the key/value pair in the hash map. If the given key already exists in
+        the hash map, its associated value is replaced with the new value. If the given key is
+        not in the hash map, a new key/value pair is added.
         """
-        pass
+        # If load is too high then resize to double current capacity
+        if self.table_load() >= 1:
+            self.resize_table(self._capacity * 2)
+        # find the bucket that the key is hashed to
+        hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+        # Search each node in the bucket
+        for node in hash_bucket:
+            # If the key is found, update the value
+            if node.key == key:
+                node.value = value
+                return
+        # If the key is not found, add it
+        hash_bucket.insert(key, value)
+        self._size += 1
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        Changes the capacity of the underlying table. All existing key/value pairs must
+        be put into the new table, meaning the hash table links must be rehashed.
         """
-        pass
+        # Ensure that the new capacity is a prime number greater than or equal to 1
+        if new_capacity < 1:
+            return
+        # Create a new hash table, this handles ensuring capacity is prime
+        new_map = HashMap(new_capacity, self._hash_function)
+        # Copy each element from the old hash table to the new hash table
+        list_pointer = 0
+        # Copy all elements from each bucket until the new hash table is the same size as the old hash table
+        while new_map._size < self._size:
+            for node in self._buckets.get_at_index(list_pointer):
+                new_map.put(node.key, node.value)
+            list_pointer += 1
+        # Update buckets and capacity
+        self._buckets = new_map._buckets
+        self._capacity = new_map._capacity
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
+        Returns the current hash table load factor.
         """
-        pass
+        return self._size / self._capacity
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
+        Returns the number of empty buckets in the hash table.
         """
-        pass
+        empty_buckets = 0
+        # Checks the length of each bucket and iterates the counter when a bucket is empty
+        for i in range(self._buckets.length()):
+            if self._buckets.get_at_index(i).length() == 0:
+                empty_buckets += 1
+        return empty_buckets
+
 
     def get(self, key: str):
         """
-        TODO: Write this implementation
+        Returns the value associated with the given key. If the key is not in the hash
+        map, the method returns None.
         """
-        pass
+        # Find the bucket that the key is hashed to
+        hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+        # Iterate through bucket to find key
+        for node in hash_bucket:
+            if node.key == key:
+                return node.value
+        # Return None if not found
+        return None
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
+        Returns True if the given key is in the hash map, otherwise it returns False. An
+        empty hash map does not contain any keys.
         """
-        pass
+        # Find the bucket that the key is hashed to
+        hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+        # Iterate through bucket to find key
+        for node in hash_bucket:
+            if node.key == key:
+                return True
+        # Return False if not found
+        return False
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
+        Removes the given key and its associated value from the hash map. If the key
+        is not in the hash map, the method does nothing (no exception needs to be raised).
         """
-        pass
+        # Find the bucket that the key is hashed to
+        hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+        # Remove node if it is in the bucket
+        hash_bucket.remove(key)
+        self._size -= 1
 
     def get_keys_and_values(self) -> DynamicArray:
         """
-        TODO: Write this implementation
+        Returns a dynamic array where each index contains a tuple of a key/value pair
+        stored in the hash map
         """
-        pass
+        tuple_arr = DynamicArray()
+        list_pointer = 0
+        # Copy all elements from each bucket as tuples until the tuple array is the same size as the old hash table
+        while tuple_arr.length() < self._size:
+            for node in self._buckets.get_at_index(list_pointer):
+                tuple_arr.append((node.key, node.value))
+            list_pointer += 1
+
+        return tuple_arr
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
+        Clears the contents of the hash map. It does not change the underlying hash
+        table capacity.
         """
         pass
 
