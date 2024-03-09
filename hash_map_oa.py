@@ -87,39 +87,132 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
+        Updates the key/value pair in the hash map. If the given key already exists in
+        the hash map, its associated value is replaced with the new value. If the given key is
+        not in the hash map, a new key/value pair is added. This runs in amortized O(1) time as the number of buckets
+        to search is limited to a constant and resize doubles capacity.
         """
-        pass
+
+        # If load is too high then resize to double current capacity
+        if self.table_load() >= 0.5:
+            self.resize_table(self._capacity * 2)
+
+        # find the bucket that the key is first hashed to
+        bucket_index = self._hash_function(key) % self._capacity
+
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket
+        # We already probed the original bucket, so we start quadratic probing with a base of 1
+        i = 1
+        while self._buckets.get_at_index(bucket_index) is not None:
+
+            # If the same key is found, then we only update the value
+            if self._buckets.get_at_index(bucket_index).key == key:
+                self._buckets.get_at_index(bucket_index).value = value
+                return
+
+            # Use quadratic probing to find the next index
+            bucket_index = (self._hash_function(key) + i ** 2) % self._capacity
+            i += 1
+
+        # Once we probe to an empty index, we insert the value
+        self._buckets.set_at_index(bucket_index, HashEntry(key, value))
+        self._size = self._size + 1
+
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        Changes the capacity of the underlying table. All active key/value pairs must be
+        put into the new table, meaning all non-tombstone hash table links must be rehashed.
+        Occur in O(N) time where N is the number of elements as each element is copied over.
         """
-        pass
+
+        # Ensure that the new capacity is a prime number greater than or equal to the current number of elements
+        if new_capacity < self._size:
+            return
+
+        # Create a new hash table, this handles ensuring capacity is prime
+        new_map = HashMap(new_capacity, self._hash_function)
+
+        # Correct the bug in the _next_prime method for 2 that we are not allowed to change
+        if new_capacity == 2:
+            new_map._capacity = 2
+            new_map._buckets.pop()
+
+        # Hash all the hash entries that are not tombstones into the new hash map
+        for bucket in self:
+            if bucket is not None and bucket.is_tombstone == False:
+                new_map.put(bucket.key, bucket.value)
+
+        # Update buckets and capacity
+        self._buckets = new_map._buckets
+        self._capacity = new_map._capacity
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
+        Returns the current hash table load factor. O(1)
         """
-        pass
+        return self._size / self._capacity
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
+        Returns the number of empty buckets in the hash table. Occurs in O(N) where n
+        is the capacity (number of buckets).
         """
-        pass
+
+        # Iterate over each bucket and count buckets that are empty
+        empty_buckets = 0
+        for bucket in self:
+            if bucket is None:   # Do not count tombstones
+                empty_buckets += 1
+
+        return empty_buckets
 
     def get(self, key: str) -> object:
         """
-        TODO: Write this implementation
+        Returns the value associated with the given key. If the key is not in the hash
+        map, the method returns None. Occurs in O(1) time as number of buckets to search is limited to a constant
+        because load factor is limited to 0.5.
         """
-        pass
+
+        # find the bucket that the key is first hashed to
+        bucket_index = self._hash_function(key) % self._capacity
+
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket
+        # We already probed the original bucket, so we start quadratic probing with a base of 1
+        i = 1
+        while self._buckets.get_at_index(bucket_index) is not None:
+
+            # If the same key is found, then we return the value
+            if self._buckets.get_at_index(bucket_index).key == key:
+                return self._buckets.get_at_index(bucket_index).value
+
+            # Use quadratic probing to find the next index
+            bucket_index = (self._hash_function(key) + i ** 2) % self._capacity
+            i += 1
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
+        Returns True if the given key is in the hash map, otherwise it returns False.
         """
-        pass
+
+        # find the bucket that the key is first hashed to
+        bucket_index = self._hash_function(key) % self._capacity
+
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket
+        # We already probed the original bucket, so we start quadratic probing with a base of 1
+        i = 1
+        while self._buckets.get_at_index(bucket_index) is not None:
+
+            # If the same key is found, then we return True
+            if self._buckets.get_at_index(bucket_index).key == key:
+                return True
+
+            # Use quadratic probing to find the next index
+            bucket_index = (self._hash_function(key) + i ** 2) % self._capacity
+            i += 1
+
+        # If we reached an empty bucket then the key is not in the hash table
+        return False
 
     def remove(self, key: str) -> None:
         """
