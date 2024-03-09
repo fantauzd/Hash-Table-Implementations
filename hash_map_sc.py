@@ -207,7 +207,8 @@ class HashMap:
         Clears the contents of the hash map. It does not change the underlying hash
         table capacity.
         """
-        pass
+        self._buckets = DynamicArray()
+        self._size = 0
 
 
 def find_mode(da: DynamicArray) -> tuple[DynamicArray, int]:
