@@ -298,8 +298,7 @@ class HashMap:
 
         # set each bucket to an empty linked list
         for i in range(self._capacity):
-            bucket = self._buckets.get_at_index(i)
-            bucket = LinkedList()
+            self._buckets.set_at_index(i, LinkedList())
 
         # set the size to 0
         self._size = 0
