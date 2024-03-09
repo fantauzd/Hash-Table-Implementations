@@ -92,7 +92,8 @@ class HashMap:
         """
         Updates the key/value pair in the hash map. If the given key already exists in
         the hash map, its associated value is replaced with the new value. If the given key is
-        not in the hash map, a new key/value pair is added.
+        not in the hash map, a new key/value pair is added. Runs in amortized O(1) as the number of elements
+        in each bucket is limited to a constant and resizing doubles capacity.
         """
         # If load is too high then resize to double current capacity
         if self.table_load() >= 1:
@@ -112,7 +113,8 @@ class HashMap:
     def resize_table(self, new_capacity: int) -> None:
         """
         Changes the capacity of the underlying table. All existing key/value pairs must
-        be put into the new table, meaning the hash table links must be rehashed.
+        be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
+        where n is the number of elements in the original hash table.
         """
         # Ensure that the new capacity is a prime number greater than or equal to 1
         if new_capacity < 1:
@@ -138,7 +140,8 @@ class HashMap:
 
     def empty_buckets(self) -> int:
         """
-        Returns the number of empty buckets in the hash table.
+        Returns the number of empty buckets in the hash table. Occurs in O(n) where n
+        is the capacity (number of buckets).
         """
         empty_buckets = 0
         # Checks the length of each bucket and iterates the counter when a bucket is empty
@@ -147,11 +150,11 @@ class HashMap:
                 empty_buckets += 1
         return empty_buckets
 
-
     def get(self, key: str):
         """
         Returns the value associated with the given key. If the key is not in the hash
-        map, the method returns None.
+        map, the method returns None. Runs in O(1) as the number of elements
+        in each bucket is limited to a constant.
         """
         # Find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
@@ -165,7 +168,8 @@ class HashMap:
     def contains_key(self, key: str) -> bool:
         """
         Returns True if the given key is in the hash map, otherwise it returns False. An
-        empty hash map does not contain any keys.
+        empty hash map does not contain any keys. Runs in O(1) as the number of elements
+        in each bucket is limited to a constant.
         """
         # Find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
@@ -180,6 +184,7 @@ class HashMap:
         """
         Removes the given key and its associated value from the hash map. If the key
         is not in the hash map, the method does nothing (no exception needs to be raised).
+        Runs in O(1) as the number of elements in each bucket is limited to a constant.
         """
         # Find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
@@ -190,7 +195,7 @@ class HashMap:
     def get_keys_and_values(self) -> DynamicArray:
         """
         Returns a dynamic array where each index contains a tuple of a key/value pair
-        stored in the hash map
+        stored in the hash map. Runs in O(n) where n is the number of elements in the hash table.
         """
         tuple_arr = DynamicArray()
         list_pointer = 0
@@ -205,7 +210,7 @@ class HashMap:
     def clear(self) -> None:
         """
         Clears the contents of the hash map. It does not change the underlying hash
-        table capacity.
+        table capacity. Runs in O(1).
         """
         self._buckets = DynamicArray()
         self._size = 0
@@ -213,11 +218,45 @@ class HashMap:
 
 def find_mode(da: DynamicArray) -> tuple[DynamicArray, int]:
     """
-    TODO: Write this implementation
+    This function will return a tuple containing, in this order, a dynamic array
+    comprising the mode (most occurring) value(s) of the given array, and an
+    integer representing the highest frequency of occurrence for the mode value(s).
+    Runs in O(1) as the hash table methods run in constant time.
+    O(n) occurs when we search through the hash table for the greatest frequency.
+
+    :param da: A dynamic array of strings
+    :return: A tuple with a dynamic array containing the mode(s) and the mode(s)'s frequency.
     """
-    # if you'd like to use a hash map,
     # use this instance of your Separate Chaining HashMap
     map = HashMap()
+    uni_keys = ()
+    # Add each string from the dynamic array to a hash map, with its frequency.
+    # If the string is already there, increment its frequency
+    for i in range(da.length()):
+        val = da.get_at_index(i)
+        cur = map.get(val) if map.get(val) else 0
+        map.put(val, 1 + cur)
+    # Create variables to hold the mode(s) and frequency
+    mode = DynamicArray()
+    freq = 0
+    # Iterate through the map and store the mode(s) and frequency
+    list_pointer = 0
+    counter = 0
+    while counter < map.get_size():
+        for node in map._buckets.get_at_index(list_pointer):
+            counter += 1
+            key = node.key
+            # If we find a key with higher frequency, replace the mode
+            if map.get(key) > freq:
+                mode = DynamicArray()
+                mode.append(key)
+                freq = map.get(key)
+            # If we find a key with the same frequency, add it to modes
+            elif map.get(key) == freq:
+                mode.append(key)
+        list_pointer += 1
+    # Return the mode(s) and frequency as a tuple
+    return (mode, freq)
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #
