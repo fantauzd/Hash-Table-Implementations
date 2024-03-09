@@ -95,17 +95,21 @@ class HashMap:
         not in the hash map, a new key/value pair is added. Runs in amortized O(1) as the number of elements
         in each bucket is limited to a constant and resizing doubles capacity.
         """
+
         # If load is too high then resize to double current capacity
         if self.table_load() >= 1:
             self.resize_table(self._capacity * 2)
+
         # find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+
         # Search each node in the bucket
         for node in hash_bucket:
             # If the key is found, update the value
             if node.key == key:
                 node.value = value
                 return
+
         # If the key is not found, add it
         hash_bucket.insert(key, value)
         self._size += 1
@@ -116,11 +120,14 @@ class HashMap:
         be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
         where n is the number of elements in the original hash table.
         """
+
         # Ensure that the new capacity is a prime number greater than or equal to 1
         if new_capacity < 1:
             return
+
         # Create a new hash table, this handles ensuring capacity is prime
         new_map = HashMap(new_capacity, self._hash_function)
+
         # Copy each element from the old hash table to the new hash table
         list_pointer = 0
         # Copy all elements from each bucket until the new hash table is the same size as the old hash table
@@ -128,6 +135,7 @@ class HashMap:
             for node in self._buckets.get_at_index(list_pointer):
                 new_map.put(node.key, node.value)
             list_pointer += 1
+
         # Update buckets and capacity
         self._buckets = new_map._buckets
         self._capacity = new_map._capacity
@@ -167,6 +175,7 @@ class HashMap:
         be put into the new table, meaning the hash table links must be rehashed. Occurs in O(n)
         where n is the number of elements in the original hash table.
         """
+
         # Ensure that the new capacity is a prime number greater than or equal to 1
         if new_capacity < 1:
             return
@@ -191,7 +200,6 @@ class HashMap:
         self._buckets = new_buckets
         self._capacity = new_capacity
 
-
     def table_load(self) -> float:
         """
         Returns the current hash table load factor.
@@ -203,11 +211,13 @@ class HashMap:
         Returns the number of empty buckets in the hash table. Occurs in O(n) where n
         is the capacity (number of buckets).
         """
+
         empty_buckets = 0
         # Checks the length of each bucket and iterates the counter when a bucket is empty
         for i in range(self._buckets.length()):
             if self._buckets.get_at_index(i).length() == 0:
                 empty_buckets += 1
+
         return empty_buckets
 
     def get(self, key: str):
@@ -216,12 +226,15 @@ class HashMap:
         map, the method returns None. Runs in O(1) as the number of elements
         in each bucket is limited to a constant.
         """
+
         # Find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+
         # Iterate through bucket to find key
         for node in hash_bucket:
             if node.key == key:
                 return node.value
+
         # Return None if not found
         return None
 
@@ -231,12 +244,15 @@ class HashMap:
         empty hash map does not contain any keys. Runs in O(1) as the number of elements
         in each bucket is limited to a constant.
         """
+
         # Find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+
         # Iterate through bucket to find key
         for node in hash_bucket:
             if node.key == key:
                 return True
+
         # Return False if not found
         return False
 
@@ -246,8 +262,10 @@ class HashMap:
         is not in the hash map, the method does nothing (no exception needs to be raised).
         Runs in O(1) as the number of elements in each bucket is limited to a constant.
         """
+
         # Find the bucket that the key is hashed to
         hash_bucket = self._buckets.get_at_index(self._hash_function(key) % self._capacity)
+
         # Remove node if it is in the bucket
         hash_bucket.remove(key)
         self._size -= 1
@@ -257,8 +275,10 @@ class HashMap:
         Returns a dynamic array where each index contains a tuple of a key/value pair
         stored in the hash map. Runs in O(n) where n is the number of elements in the hash table.
         """
+
         tuple_arr = DynamicArray()
         list_pointer = 0
+
         # Copy all elements from each bucket as tuples until the tuple array is the same size as the old hash table
         while tuple_arr.length() < self._size:
             for node in self._buckets.get_at_index(list_pointer):
@@ -287,18 +307,21 @@ def find_mode(da: DynamicArray) -> tuple[DynamicArray, int]:
     :param da: A dynamic array of strings
     :return: A tuple with a dynamic array containing the mode(s) and the mode(s)'s frequency.
     """
+
     # use this instance of your Separate Chaining HashMap
     map = HashMap()
-    uni_keys = ()
+
     # Add each string from the dynamic array to a hash map, with its frequency.
     # If the string is already there, increment its frequency
     for i in range(da.length()):
         val = da.get_at_index(i)
         cur = map.get(val) if map.get(val) else 0
         map.put(val, 1 + cur)
+
     # Create variables to hold the mode(s) and frequency
     mode = DynamicArray()
     freq = 0
+
     # Iterate through the map and store the mode(s) and frequency
     list_pointer = 0
     counter = 0
@@ -315,6 +338,7 @@ def find_mode(da: DynamicArray) -> tuple[DynamicArray, int]:
             elif map.get(key) == freq:
                 mode.append(key)
         list_pointer += 1
+
     # Return the mode(s) and frequency as a tuple
     return (mode, freq)
 
