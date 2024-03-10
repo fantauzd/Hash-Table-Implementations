@@ -267,8 +267,8 @@ class HashMap:
         """
 
         # Iterate over each bucket and set it to None
-        for bucket in self:
-            bucket = None
+        for i in range(self._capacity):
+            self._buckets.set_at_index(i, None)
 
         self._size = 0
 
