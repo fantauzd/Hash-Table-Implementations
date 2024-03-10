@@ -106,7 +106,8 @@ class HashMap:
         while self._buckets.get_at_index(bucket_index) is not None:
 
             # If the same key is found, then we only update the value
-            if self._buckets.get_at_index(bucket_index).key == key:
+            if self._buckets.get_at_index(bucket_index).key == key and \
+            self._buckets.get_at_index(bucket_index).is_tombstone == False:  # don't update the values for tombstones
                 self._buckets.get_at_index(bucket_index).value = value
                 return
 
@@ -181,7 +182,8 @@ class HashMap:
         while self._buckets.get_at_index(bucket_index) is not None:
 
             # If the same key is found, then we return the value
-            if self._buckets.get_at_index(bucket_index).key == key:
+            if self._buckets.get_at_index(bucket_index).key == key and \
+            self._buckets.get_at_index(bucket_index).is_tombstone == False:     # Ignore tombstones
                 return self._buckets.get_at_index(bucket_index).value
 
             # Use quadratic probing to find the next index
@@ -204,7 +206,8 @@ class HashMap:
         while self._buckets.get_at_index(bucket_index) is not None:
 
             # If the same key is found, then we return True
-            if self._buckets.get_at_index(bucket_index).key == key:
+            if self._buckets.get_at_index(bucket_index).key == key and \
+            self._buckets.get_at_index(bucket_index).is_tombstone == False:         # Ignore tombstones
                 return True
 
             # Use quadratic probing to find the next index
@@ -230,11 +233,9 @@ class HashMap:
         i = 1
         while self._buckets.get_at_index(bucket_index) is not None:
 
-            # If the same key is found, then we erase its key and value and make it a tombstone
+            # If the same key is found, then make it a tombstone
             if self._buckets.get_at_index(bucket_index).key == key:
-                remove_entry = self._buckets.get_at_index(bucket_index)
-                remove_entry.key, remove_entry.value = None, None
-                remove_entry.is_tombstone = True
+                self._buckets.get_at_index(bucket_index).is_tombstone = True
                 self._size -= 1
                 return
 
