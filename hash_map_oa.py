@@ -105,10 +105,13 @@ class HashMap:
         i = 1
         while self._buckets.get_at_index(bucket_index) is not None:
 
-            # If the same key is found, then we only update the value
-            if self._buckets.get_at_index(bucket_index).key == key and \
-            self._buckets.get_at_index(bucket_index).is_tombstone == False:  # don't update the values for tombstones
+            # If the same key is found, then we update the value
+            if self._buckets.get_at_index(bucket_index).key == key:
                 self._buckets.get_at_index(bucket_index).value = value
+                #If the key is in a tombstone, it is no longer a tombstone and size increases
+                if self._buckets.get_at_index(bucket_index).is_tombstone:
+                    self._buckets.get_at_index(bucket_index).is_tombstone = False
+                    self._size += 1
                 return
 
             # Use quadratic probing to find the next index
@@ -141,7 +144,7 @@ class HashMap:
 
         # Hash all the hash entries that are not tombstones into the new hash map
         for bucket in self:
-                new_map.put(bucket.key, bucket.value)
+            new_map.put(bucket.key, bucket.value)
 
         # Update buckets and capacity
         self._buckets = new_map._buckets
@@ -235,8 +238,9 @@ class HashMap:
 
             # If the same key is found, then make it a tombstone
             if self._buckets.get_at_index(bucket_index).key == key:
-                self._buckets.get_at_index(bucket_index).is_tombstone = True
-                self._size -= 1
+                if not self._buckets.get_at_index(bucket_index).is_tombstone: # If already tombstone, do nothing
+                    self._buckets.get_at_index(bucket_index).is_tombstone = True
+                    self._size -= 1
                 return
 
             # Use quadratic probing to find the next index
