@@ -100,7 +100,7 @@ class HashMap:
         # find the bucket that the key is first hashed to
         bucket_index = self._hash_function(key) % self._capacity
 
-        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket or the key.
         # We already probed the original bucket, so we start quadratic probing with a base of 1
         i = 1
         while self._buckets.get_at_index(bucket_index) is not None:
@@ -140,7 +140,6 @@ class HashMap:
 
         # Hash all the hash entries that are not tombstones into the new hash map
         for bucket in self:
-            if bucket is not None and bucket.is_tombstone == False:
                 new_map.put(bucket.key, bucket.value)
 
         # Update buckets and capacity
@@ -155,17 +154,16 @@ class HashMap:
 
     def empty_buckets(self) -> int:
         """
-        Returns the number of empty buckets in the hash table. Occurs in O(N) where n
-        is the capacity (number of buckets).
+        Returns the number of empty buckets in the hash table. Occurs in O(N) where N
+        is the number of elements (size).
         """
 
         # Iterate over each bucket and count buckets that are empty
-        empty_buckets = 0
-        for bucket in self:
-            if bucket is None:   # Do not count tombstones
-                empty_buckets += 1
+        full_buckets = 0
+        for bucket in self: # Only iterates over buckets that have values (not tombstones)
+                full_buckets += 1
 
-        return empty_buckets
+        return self._capacity - full_buckets
 
     def get(self, key: str) -> object:
         """
@@ -177,7 +175,7 @@ class HashMap:
         # find the bucket that the key is first hashed to
         bucket_index = self._hash_function(key) % self._capacity
 
-        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket or the key.
         # We already probed the original bucket, so we start quadratic probing with a base of 1
         i = 1
         while self._buckets.get_at_index(bucket_index) is not None:
@@ -193,12 +191,14 @@ class HashMap:
     def contains_key(self, key: str) -> bool:
         """
         Returns True if the given key is in the hash map, otherwise it returns False.
+        Occurs in O(1) time as number of buckets to search is limited to a constant
+        because load factor is limited to 0.5.
         """
 
         # find the bucket that the key is first hashed to
         bucket_index = self._hash_function(key) % self._capacity
 
-        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket or the key.
         # We already probed the original bucket, so we start quadratic probing with a base of 1
         i = 1
         while self._buckets.get_at_index(bucket_index) is not None:
@@ -216,28 +216,67 @@ class HashMap:
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
+        Removes the given key and its associated value from the hash map. If the key
+        is not in the hash map, the method does nothing (no exception raised).
+        Occurs in O(1) time as number of buckets to search is limited to a constant
+        because load factor is limited to 0.5.
         """
-        pass
+
+        # find the bucket that the key is first hashed to
+        bucket_index = self._hash_function(key) % self._capacity
+
+        # If the bucket is not empty, continue with quadratic probing until we find an empty bucket or the key.
+        # We already probed the original bucket, so we start quadratic probing with a base of 1.
+        i = 1
+        while self._buckets.get_at_index(bucket_index) is not None:
+
+            # If the same key is found, then we erase its key and value and make it a tombstone
+            if self._buckets.get_at_index(bucket_index).key == key:
+                remove_entry = self._buckets.get_at_index(bucket_index)
+                remove_entry.key, remove_entry.value = None, None
+                remove_entry.is_tombstone = True
+                self._size -= 1
+                return
+
+            # Use quadratic probing to find the next index
+            bucket_index = (self._hash_function(key) + i ** 2) % self._capacity
+            i += 1
+
 
     def get_keys_and_values(self) -> DynamicArray:
         """
-        TODO: Write this implementation
+        Returns a dynamic array where each index contains a tuple of a key/value pair
+        stored in the hash map. The order of the keys in the dynamic array does not matter.
+        Runs in O(N) time where N is the number of elements (size).
         """
-        pass
+
+        tuple_arr = DynamicArray()
+
+        # Iterate over each bucket and add any hash entries to the tuple array
+        for bucket in self:
+                tuple_arr.append((bucket.key, bucket.value))
+
+        return tuple_arr
+
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
+        Clears the contents of the hash map. It does not change the underlying hash table capacity.
+        Runs in O(N) time where N is the number of elements (size).
         """
-        pass
+
+        # Iterate over each bucket and set it to None
+        for bucket in self:
+            bucket = None
+
+        self._size = 0
 
     def __iter__(self):
         """
         Enables the hash map to iterate across itself.
         """
 
-        # Initialize a variable to track iterator's progress
+        # Initialize a variable to track iterators' progress
         self._index = 0
 
         return self
@@ -247,8 +286,12 @@ class HashMap:
         Returns the next item in the hash map, based on the current location of the iterator.
         """
 
-        # Find the next value in the buckets dynamic array
+        # Find the next item in the buckets dynamic array that is not None or a tombstone
         try:
+            while self._buckets.get_at_index(self._index) is None or \
+            self._buckets.get_at_index(self._index).is_tombstone == True:
+                self._index = self._index + 1
+
             value = self._buckets.get_at_index(self._index)
 
         # If we pass the end of the array an exception is raised and we stop iteration
